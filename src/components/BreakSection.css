@@ -1,0 +1,40 @@
+.break-section {
+    background-color: #edf6f9;
+    padding: 4rem 2rem;
+  }
+  
+  .break-container {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2rem;
+    justify-content: space-between;
+  }
+  
+  .break-img {
+    flex: 1;
+    max-width: 450px;
+    width: 100%;
+    animation: slideInRight 1s ease-out;
+  }
+  
+  .break-text {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .break-text h2 {
+    font-family: 'Droid Serif', serif;
+    color: #006d77;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .break-text p {
+    font-family: 'Poppins', sans-serif;
+    color: #1d1d1d;
+    font-size: 1.1rem;
+  }
+  

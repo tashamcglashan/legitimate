@@ -1,0 +1,50 @@
+.footer {
+    background-color: #edf6f9;
+    padding: 2rem 1rem;
+    border-top: 1px solid #ccc;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .footer-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .footer-logo img {
+    width: 150px;
+  }
+  
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .footer-links a {
+    color: #006d77;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  
+  .footer-copy {
+    font-size: 0.9rem;
+    color: #1d1d1d;
+  }
+  
+  .footer a {
+    color: #1d1d1d; /* or your preferred footer link color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .footer a:hover {
+    color: #006d77; /* your brand teal, or another accent */
+  }
+  

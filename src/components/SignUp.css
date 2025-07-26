@@ -1,0 +1,74 @@
+.signup-page {
+    padding: 4rem 2rem;
+    background-color: #EDF6F9;
+    min-height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    max-width: 500px;
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: #006D77;
+    transition: width 0.3s ease;
+  }
+  
+  .form-step {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .form-step h2 {
+    font-family: 'Droid Serif', serif;
+    margin-bottom: 1rem;
+    color: #006D77;
+  }
+  
+  .form-step input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: white;       /* ✅ ensures white background */
+    color: #1D1D1D;                /* ✅ makes input text visible */
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .form-step button {
+    background-color: #006D77;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .form-step button:disabled {
+    background-color: #ffffff;
+    cursor: not-allowed;
+  }
+  
+  .step-buttons {
+    display: flex;
+    justify-content: space-between;
+  }
+  

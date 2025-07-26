@@ -1,0 +1,51 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: #EDF6F9;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .navbar-logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #006D77;
+    font-family: 'Droid Serif', serif;
+  }
+  
+  .navbar-links a {
+    text-decoration: none;
+    color: #1D1D1D;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+    margin-left: 1.5rem;
+    transition: color 0.2s ease;
+  }
+  
+  /* Remove underline and keep brand color on hover, visited, active */
+  .navbar-links a:hover,
+  .navbar-links a:visited,
+  .navbar-links a:active {
+    text-decoration: none;
+    color: #1D1D1D;
+  }
+  
+  
+  .logo-link {
+    transition: color 0.3s ease;
+    text-decoration: none;
+    color: #006D77;
+    font-size: 28px;
+    font-family: 'Droid Serif', serif;
+    font-weight: bold;
+  }
+  
+  /* Remove hover, active, and visited link styles */
+  .logo-link:hover,
+  .logo-link:visited,
+  .logo-link:active {
+    text-decoration: none;
+    color: #006D77;
+  }
+  

@@ -1,0 +1,46 @@
+.match-setup-page {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    background: #e0e0e0;
+    margin-bottom: 2rem;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background-color: #006d77;
+    transition: width 0.3s ease;
+  }
+  
+  .form-step h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .option-buttons button {
+    margin: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: 0.2s ease;
+  }
+  
+  .option-buttons button.selected {
+    border-color: #006d77;
+    background-color: #edf6f9;
+  }
+  
+  .step-buttons {
+    margin-top: 2rem;
+  }
+  

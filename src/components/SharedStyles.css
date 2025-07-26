@@ -1,0 +1,33 @@
+.static-page {
+    padding: 4rem 2rem;
+    max-width: 800px;
+    margin: auto;
+    font-family: 'Poppins', sans-serif;
+    color: #1d1d1d;
+  }
+  
+  .static-page h1 {
+    font-family: 'Droid Serif', serif;
+    color: #006d77;
+    margin-bottom: 1rem;
+  }
+  
+  .static-page p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  
+  .static-page ul {
+    padding-left: 1.5rem;
+  }
+  
+  .static-page a {
+    color: #006d77;
+    text-decoration: none;
+  }
+  
+  .static-page a:hover {
+    text-decoration: underline;
+  }
+  

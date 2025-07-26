@@ -1,0 +1,62 @@
+.joinnow-section {
+    background-color: #ffffff;
+    padding: 4rem 2rem;
+  }
+  
+  .joinnow-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: auto;
+    gap: 2rem;
+  }
+  
+  .joinnow-text {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .joinnow-text h2 {
+    font-family: 'Droid Serif', serif;
+    font-size: 2rem;
+    color: #006d77;
+    margin-bottom: 1rem;
+  }
+  
+  .joinnow-text p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1rem;
+    color: #1d1d1d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  
+  .joinnow-button {
+    background-color: #006d77;
+    color: white;
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .joinnow-button:hover {
+    background-color: #005961;
+  }
+  
+  .joinnow-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .joinnow-image img {
+    width: 100%;
+    max-width: 450px;
+    animation: slideInRight 1s ease-out;
+  }
+  

@@ -1,0 +1,58 @@
+.signin-page {
+    max-width: 400px;
+    margin: 5rem auto;
+    padding: 2rem;
+    background-color: #f7f7f7;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Helvetica Neue', sans-serif;
+    text-align: center;
+  }
+  
+  .signin-page h2 {
+    margin-bottom: 1.5rem;
+    color: #1d1d1d;
+  }
+  
+  .signin-page form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .signin-page input {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  
+  .signin-page button {
+    padding: 0.75rem;
+    background-color: #006d77;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+  }
+  
+  .signin-page button:hover {
+    background-color: #005a63;
+  }
+  
+  .error-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+  }
+
+  .forgot-password {
+    cursor: pointer;
+    color: #006d77; /* optional: makes it look like a link */
+    text-decoration: underline; /* optional: underline for clarity */
+    margin-top: 0.5rem;
+  }
+  
+  
