@@ -1,0 +1,141 @@
+.profile-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: Arial, sans-serif;
+  color: #1d1d1d;
+}
+
+.profile-page h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.profile-page h3 {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.photo-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.photo-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.photo-thumbnail {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.photo-upload {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+}
+
+.delete-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 26px;
+  height: 26px;
+  background-color: crimson;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  padding: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* File input when adding photos */
+.photo-add input[type="file"] {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+/* Save, Cancel, Edit buttons */
+.edit-actions button {
+  background-color: #006d77;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 1rem;
+  margin-right: 10px;
+}
+
+.edit-actions button:hover {
+  background-color: #004f56;
+}
+
+/* Log out button style */
+.logout-section {
+  margin-top: 2rem;
+}
+
+.logout-button {
+  background-color: #ff5e5e;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #d93c3c;
+}
+
+.logout-wrapper {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.logout-button {
+  background-color: #e63946;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.logout-button:hover {
+  background-color: #c72c37;
+}
+
+.verified-status {
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.selfie-verified {
+  color: green;
+}
+
+.selfie-pending {
+  color: orange;
+}
+

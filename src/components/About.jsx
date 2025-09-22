@@ -8,7 +8,7 @@ export default function About() {
       <p>
         LegitiMate was built for people tired of fake profiles, ghosting, and empty promises.
         We combine modern tech with real accountability — including selfie verification,
-        background checks, and scam detection — to help you meet trustworthy people looking for real relationships.
+        and scam detection — to help you meet trustworthy people looking for real relationships.
       </p>
       <p>
         We believe dating should be honest, respectful, and secure. That’s why we’re committed to creating a

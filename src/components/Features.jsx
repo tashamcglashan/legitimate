@@ -8,11 +8,7 @@ export default function Features() {
       title: "Selfie Verification",
       description: "Every profile starts with a real-time selfie check to prove they're real.",
     },
-    {
-      icon: "🔍",
-      title: "Background Checked",
-      description: "We run basic background checks so you're not dating in the dark.",
-    },
+    
     {
       icon: "🤖",
       title: "Bot + Scam Detection",

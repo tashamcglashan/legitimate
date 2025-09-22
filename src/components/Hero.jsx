@@ -11,7 +11,7 @@ export default function Hero() {
         <div className="hero-left">
           <h1 className="hero-title">Real People. Real Proof.</h1>
           <p className="hero-subtitle">
-            Selfie verification, background checks, and scam protection built into dating.
+            Selfie verification and scam protection built into dating.
           </p>
           <button className="hero-button" onClick={() => navigate("/signup")}>Join Now</button>
         </div>

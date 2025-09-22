@@ -2,37 +2,82 @@
 import React, { useState } from 'react';
 import './MatchSetup.css';
 import { useNavigate } from 'react-router-dom';
+import { doc, updateDoc } from "firebase/firestore";
+import { db, auth } from "../firebase-config";
 
 export default function MatchSetup() {
   const navigate = useNavigate();
-
   const [step, setStep] = useState(1);
+  const totalSteps = 13;
+
   const [formData, setFormData] = useState({
+    firstName: '',
+    age: '',
     gender: '',
+    location: '',
     preference: '',
     familyPlans: '',
-    denomination: '',
-    activities: [],
+    belief: '',
     education: '',
+    redFlags: [],
+    photos: [],
+    prompt1: '',
+    prompt2: '',
+    prompt3: '',
   });
-
-  const totalSteps = 5;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const nextStep = () => {
-    setStep((prev) => prev + 1);
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, totalSteps));
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const handleRemovePhoto = (indexToRemove) => {
+    const updatedPhotos = formData.photos.filter((_, i) => i !== indexToRemove);
+    setFormData({ ...formData, photos: updatedPhotos });
   };
 
-  const prevStep = () => {
-    setStep((prev) => prev - 1);
+  const handleFinish = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) {
+      alert("You must be logged in.");
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "users", uid), {
+        firstName: formData.firstName,
+        age: formData.age,
+        gender: formData.gender,
+        location: formData.location,
+        photos: formData.photos,
+        prompts: {
+          partner: formData.prompt1,
+          greenFlag: formData.prompt2,
+          loveLanguage: formData.prompt3,
+        },
+    
+        matchPreferences: {
+          preference: formData.preference,
+          familyPlans: formData.familyPlans,
+          belief: formData.belief,
+          education: formData.education,
+          redFlags: formData.redFlags,
+        },
+        setupComplete: true,
+        uid: uid,
+        email: auth.currentUser.email,
+      });
+
+      navigate("/profile");
+    } catch (error) {
+      console.error("Error saving setup:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
-  const getProgress = () => {
-    return (step / totalSteps) * 100;
-  };
+  const getProgress = () => (step / totalSteps) * 100;
 
   return (
     <div className="match-setup-page">
@@ -40,330 +85,229 @@ export default function MatchSetup() {
         <div className="progress-fill" style={{ width: `${getProgress()}%` }}></div>
       </div>
 
-      {/* Question content will go here next */}
       {step === 1 && (
-  <div className="form-step">
-    <h2>What is your sex?</h2>
-    <div className="option-buttons">
-      <button
-        className={formData.gender === "Male" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, gender: "Male" })}
-      >
-        Male
-      </button>
-      <button
-        className={formData.gender === "Female" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, gender: "Female" })}
-      >
-        Female
-      </button>
-      <button
-        className={formData.gender === "Non-binary" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, gender: "Non-binary" })}
-      >
-        Non-binary
-      </button>
-      <button
-        className={formData.gender === "Prefer not to say" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, gender: "Prefer not to say" })}
-      >
-        Prefer not to say
-      </button>
-    </div>
+        <div className="form-step">
+          <h2>What is your first name?</h2>
+          <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} placeholder="e.g. Tasha" />
+          <div className="step-buttons">
+            <button onClick={nextStep} disabled={!formData.firstName}>Next</button>
+          </div>
+        </div>
+      )}
 
-    <div className="step-buttons">
-      <button onClick={nextStep} disabled={!formData.gender}>Next</button>
-    </div>
-  </div>
-)}
-  {step === 2 && (
-  <div className="form-step">
-    <h2> Who are you looking for?</h2>
-    <div className="option-buttons">
-      <button
-        className={formData.preference === "Male" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, preference: "Male" })}
-      >
-        Male
-      </button>
-      <button
-        className={formData.preference === "Female" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, preference: "Female" })}
-      >
-        Female
-      </button>
-      <button
-        className={formData.preference === "Open to all" ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, preference: "Open to all" })}
-      >
-        Open to all
-      </button>
-    </div>
+      {step === 2 && (
+        <div className="form-step">
+          <h2>What is your age?</h2>
+          <input type="number" name="age" value={formData.age} onChange={handleChange} placeholder="e.g. 34" />
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.age}>Next</button>
+          </div>
+        </div>
+      )}
 
-    <div className="step-buttons">
-      <button onClick={prevStep}>Back</button>
-      <button onClick={nextStep} disabled={!formData.preference}>Next</button>
-    </div>
-  </div>
-)}
+      {step === 3 && (
+        <div className="form-step">
+          <h2>What is your gender?</h2>
+          <div className="option-buttons">
+            {["Female", "Male", "Non-binary", "Prefer not to say"].map(option => (
+              <button
+                key={option}
+                className={formData.gender === option ? "selected" : ""}
+                onClick={() => setFormData({ ...formData, gender: option })}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.gender}>Next</button>
+          </div>
+        </div>
+      )}
 
-{step === 3 && (
-  <div className="form-step">
-    <h2>Do you have any family plans?</h2>
-    <div className="option-buttons">
-      <button
-        className={formData.familyPlans === `I want kids someday` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, familyPlans: `I want kids someday` })}
-      >
-        I want kids someday
-      </button>
-      <button
-        className={formData.familyPlans === `I’m actively planning for a family` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, familyPlans: `I’m actively planning for a family` })}
-      >
-        I’m actively planning for a family
-      </button>
-      <button
-        className={formData.familyPlans === `I already have kids — want more` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, familyPlans: `I already have kids — want more` })}
-      >
-        I already have kids — want more
-      </button>
-      <button
-        className={formData.familyPlans === `I already have kids — don’t want more` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, familyPlans: `I already have kids — don’t want more` })}
-      >
-        I already have kids — don’t want more
-      </button>
-      <button
-        className={formData.familyPlans === `I’m not planning for kids` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, familyPlans: `I’m not planning for kids` })}
-      >
-        I’m not planning for kids
-      </button>
-      <button
-        className={formData.familyPlans === `Prefer not to say` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, familyPlans: `Prefer not to say` })}
-      >
-        Prefer not to say
-      </button>
-    </div>
+      {step === 4 && (
+        <div className="form-step">
+          <h2>Where are you located?</h2>
+          <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="e.g. California" />
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.location}>Next</button>
+          </div>
+        </div>
+      )}
 
-    <div className="step-buttons">
-      <button onClick={prevStep}>Back</button>
-      <button onClick={nextStep} disabled={!formData.familyPlans}>Next</button>
-    </div>
-  </div>
-)}
+      {step === 5 && (
+        <div className="form-step">
+          <h2>Who are you looking to date?</h2>
+          <div className="option-buttons">
+            {["Men", "Women", "Everyone"].map(option => (
+              <button
+                key={option}
+                className={formData.preference === option ? "selected" : ""}
+                onClick={() => setFormData({ ...formData, preference: option })}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.preference}>Next</button>
+          </div>
+        </div>
+      )}
 
-{step === 4 && (
-  <div className="form-step">
-    <h2>What are your spiritual or religious beliefs?</h2>
-    <div className="option-buttons">
-      <button
-        className={formData.belief === `Christian` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Christian` })}
-      >
-        Christian
-      </button>
-      <button
-        className={formData.belief === `Muslim` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Muslim` })}
-      >
-        Muslim
-      </button>
-      <button
-        className={formData.belief === `Jewish` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Jewish` })}
-      >
-        Jewish
-      </button>
-      <button
-        className={formData.belief === `Hindu` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Hindu` })}
-      >
-        Hindu
-      </button>
-      <button
-        className={formData.belief === `Buddhist` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Buddhist` })}
-      >
-        Buddhist
-      </button>
-      <button
-        className={formData.belief === `Spiritual but not religious` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Spiritual but not religious` })}
-      >
-        Spiritual but not religious
-      </button>
-      <button
-        className={formData.belief === `Atheist / Agnostic` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Atheist / Agnostic` })}
-      >
-        Atheist / Agnostic
-      </button>
-      <button
-        className={formData.belief === `Other` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Other` })}
-      >
-        Other
-      </button>
-      <button
-        className={formData.belief === `Prefer not to say` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, belief: `Prefer not to say` })}
-      >
-        Prefer not to say
-      </button>
-    </div>
+      {step === 6 && (
+        <div className="form-step">
+          <h2>Do you want kids?</h2>
+          <div className="option-buttons">
+            {["Have kids – don't want more", "Have kids – want more", "Want kids", "Don’t want kids", "Unsure"].map(option => (
+              <button
+                key={option}
+                className={formData.familyPlans === option ? "selected" : ""}
+                onClick={() => setFormData({ ...formData, familyPlans: option })}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.familyPlans}>Next</button>
+          </div>
+        </div>
+      )}
 
-    <div className="step-buttons">
-      <button onClick={prevStep}>Back</button>
-      <button onClick={nextStep} disabled={!formData.belief}>Next</button>
-    </div>
-  </div>
-)}
+      {step === 7 && (
+        <div className="form-step">
+          <h2>What are your core beliefs or values?</h2>
+          <div className="option-buttons">
+            {["Christian", "Spiritual", "Muslim", "Jewish", "Atheist", "Other"].map(option => (
+              <button
+                key={option}
+                className={formData.belief === option ? "selected" : ""}
+                onClick={() => setFormData({ ...formData, belief: option })}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.belief}>Next</button>
+          </div>
+        </div>
+      )}
 
-{step === 5 && (
-  <div className="form-step">
-    <h2>What activities or interests do you enjoy?</h2>
-    <div className="option-buttons">
-      {[
-        "Traveling",
-        "Cooking",
-        "Sports",
-        "Fitness & Wellness",
-        "Reading",
-        "Outdoor Adventures",
-        "Volunteering",
-        "Live Music / Concerts",
-        "Art & Culture",
-        "Gaming",
-        "Other"
-      ].map((activity) => (
-        <button
-          key={activity}
-          className={formData.activities?.includes(activity) ? "selected" : ""}
-          onClick={() => {
-            const current = formData.activities || [];
-            const alreadySelected = current.includes(activity);
-            const updated = alreadySelected
-              ? current.filter((item) => item !== activity)
-              : [...current, activity];
-            setFormData({ ...formData, activities: updated });
-          }}
-        >
-          {activity}
-        </button>
-      ))}
-    </div>
+      {step === 8 && (
+        <div className="form-step">
+          <h2>What is your highest level of education?</h2>
+          <div className="option-buttons">
+            {["High School", "Some College", "College Graduate", "Postgraduate"].map(option => (
+              <button
+                key={option}
+                className={formData.education === option ? "selected" : ""}
+                onClick={() => setFormData({ ...formData, education: option })}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.education}>Next</button>
+          </div>
+        </div>
+      )}
 
-    <div className="step-buttons">
-      <button onClick={prevStep}>Back</button>
-      <button onClick={nextStep} disabled={!formData.activities || formData.activities.length === 0}>Next</button>
-    </div>
-  </div>
-)}
+      {step === 9 && (
+        <div className="form-step">
+          <h2>Do you have any dealbreakers or red flags?</h2>
+          <div className="option-buttons">
+            {["Smoking", "Heavy drinking", "Dishonesty", "No long-term goals", "Poor communication", "Doesn’t want kids", "Inconsistent behavior", "Other", "None"].map(flag => (
+              <button
+                key={flag}
+                className={formData.redFlags?.includes(flag) ? "selected" : ""}
+                onClick={() => {
+                  const updated = formData.redFlags.includes(flag)
+                    ? formData.redFlags.filter(f => f !== flag)
+                    : [...formData.redFlags, flag];
+                  setFormData({ ...formData, redFlags: updated });
+                }}
+              >
+                {flag}
+              </button>
+            ))}
+          </div>
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.redFlags.length}>Next</button>
+          </div>
+        </div>
+      )}
 
-{step === 6 && (
-  <div className="form-step">
-    <h2>What’s your highest level of education?</h2>
-    <div className="option-buttons">
-      <button
-        className={formData.education === `High School` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `High School` })}
-      >
-        High School
-      </button>
-      <button
-        className={formData.education === `Some College` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `Some College` })}
-      >
-        Some College
-      </button>
-      <button
-        className={formData.education === `Associate Degree` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `Associate Degree` })}
-      >
-        Associate Degree
-      </button>
-      <button
-        className={formData.education === `Bachelor’s Degree` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `Bachelor’s Degree` })}
-      >
-        Bachelor’s Degree
-      </button>
-      <button
-        className={formData.education === `Master’s Degree` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `Master’s Degree` })}
-      >
-        Master’s Degree
-      </button>
-      <button
-        className={formData.education === `Doctorate / Professional Degree` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `Doctorate / Professional Degree` })}
-      >
-        Doctorate / Professional Degree
-      </button>
-      <button
-        className={formData.education === `Trade / Vocational` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `Trade / Vocational` })}
-      >
-        Trade / Vocational
-      </button>
-      <button
-        className={formData.education === `Prefer not to say` ? "selected" : ""}
-        onClick={() => setFormData({ ...formData, education: `Prefer not to say` })}
-      >
-        Prefer not to say
-      </button>
-    </div>
+      {step === 10 && (
+        <div className="form-step">
+          <h2>Upload up to 6 profile photos</h2>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => {
+              const files = Array.from(e.target.files).slice(0, 6);
+              const urls = files.map(file => URL.createObjectURL(file));
+              setFormData({ ...formData, photos: [...formData.photos, ...urls].slice(0, 6) });
+            }}
+          />
+          <div className="photo-preview">
+            {formData.photos.map((url, index) => (
+              <div key={index} className="photo-thumbnail">
+                <img src={url} alt={`Upload ${index + 1}`} />
+                <button onClick={() => handleRemovePhoto(index)}>×</button>
+              </div>
+            ))}
+          </div>
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={formData.photos.length === 0}>Next</button>
+          </div>
+        </div>
+      )}
 
-    <div className="step-buttons">
-      <button onClick={prevStep}>Back</button>
-      <button onClick={nextStep} disabled={!formData.education}>Next</button>
-    </div>
-  </div>
-)}
+      {step === 11 && (
+        <div className="form-step">
+          <h2>What does your first date look like?</h2>
+          <input type="text" name="prompt1" value={formData.prompt1} onChange={handleChange} placeholder="e.g. Coffee at a cafe" />
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.prompt1}>Next</button>
+          </div>
+        </div>
+      )}
 
-{step === 7 && (
-  <div className="form-step">
-    <h2>Do you have any dealbreakers or red flags?</h2>
-    <div className="option-buttons">
-      {[
-        "Smoking",
-        "Heavy drinking",
-        "Dishonesty",
-        "No long-term goals",
-        "Poor communication",
-        "Doesn’t want kids",
-        "Inconsistent behavior",
-        "Other",
-        "None"
-      ].map((flag) => (
-        <button
-          key={flag}
-          className={formData.redFlags?.includes(flag) ? "selected" : ""}
-          onClick={() => {
-            const current = formData.redFlags || [];
-            const alreadySelected = current.includes(flag);
-            const updated = alreadySelected
-              ? current.filter((item) => item !== flag)
-              : [...current, flag];
-            setFormData({ ...formData, redFlags: updated });
-          }}
-        >
-          {flag}
-        </button>
-      ))}
-    </div>
+      {step === 12 && (
+        <div className="form-step">
+          <h2>What’s a green flag you bring to a relationship?</h2>
+          <input type="text" name="prompt2" value={formData.prompt2} onChange={handleChange} placeholder="e.g. I’m a great listener..." />
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={nextStep} disabled={!formData.prompt2}>Next</button>
+          </div>
+        </div>
+      )}
 
-    <div className="step-buttons">
-      <button onClick={prevStep}>Back</button>
-      <button onClick={nextStep} disabled={!formData.redFlags || formData.redFlags.length === 0}>Finish</button>
-    </div>
-  </div>
-)}
-
+      {step === 13 && (
+        <div className="form-step">
+          <h2>What’s your love language?</h2>
+          <input type="text" name="prompt3" value={formData.prompt3} onChange={handleChange} placeholder="e.g. Words of affirmation" />
+          <div className="step-buttons">
+            <button onClick={prevStep}>Back</button>
+            <button onClick={handleFinish} disabled={!formData.prompt3}>Finish</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

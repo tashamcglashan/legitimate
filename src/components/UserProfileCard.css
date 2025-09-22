@@ -1,0 +1,120 @@
+.profile-card {
+    max-width: 600px;
+    margin: auto;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    font-family: sans-serif;
+  }
+  
+  .profile-header {
+    text-align: center;
+  }
+  
+  .main-photo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 100px;
+    border: 3px solid #ccc;
+  }
+  
+  
+  .name-age {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .verification-badge {
+    display: flex;
+    align-items: center;
+    background-color: #006d77;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+  
+  .verification-badge img {
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+  }
+  
+  .location {
+    font-size: 0.9rem;
+    color: gray;
+  }
+  
+  .photo-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* <-- This centers the images */
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  
+  .photo-gallery img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin: 5px;
+    border-radius: 8px;
+  }
+  
+  
+  .prompt-section {
+    margin-top: 1.5rem;
+  }
+  
+  .prompt-block {
+    margin-bottom: 1rem;
+  }
+  
+  .edit-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    background: #eee;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .prompt-block textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    resize: vertical;
+    margin-bottom: 10px;
+  }
+  
+  .prompt-block button {
+    padding: 6px 12px;
+    background-color: #006d77;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .prompt-block button:hover {
+    background-color: #004f5a;
+  }
+  
+  /*.profile-page-container {
+    background-image: url("../assets/undraw_intense-feeling_4i8u.svg"); /* adjust path if needed 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    padding: 2rem;
+    color: #504e4e; /* optional, to ensure text is visible 
+  }
+  */

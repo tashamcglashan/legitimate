@@ -30,6 +30,7 @@
     font-size: 1rem;
     border: 2px solid #ccc;
     background-color: white;
+    color: black;
     cursor: pointer;
     border-radius: 8px;
     transition: 0.2s ease;
@@ -42,5 +43,62 @@
   
   .step-buttons {
     margin-top: 2rem;
+  }
+  
+  .delete-photo {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .photo-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  
+  .photo-thumbnail {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .photo-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .photo-thumbnail button {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    cursor: pointer;
   }
   
