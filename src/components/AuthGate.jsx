@@ -1,28 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase-config";
 
-export default function AuthGate({ children }) {
-  const navigate = useNavigate();
+export default function AuthGate() {
   const location = useLocation();
-  const [ready, setReady] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [redirect, setRedirect] = useState(null);
 
   useEffect(() => {
-    let unsub = onAuthStateChanged(auth, async (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      // not signed in
       if (!user) {
-        navigate("/signin", { replace: true });
+        setRedirect({ to: "/signin" });
+        setChecking(false);
         return;
       }
 
+      // email not verified
       if (!user.emailVerified) {
         alert("Please verify your email first.");
-        navigate("/signin", { replace: true });
+        setRedirect({ to: "/signin" });
+        setChecking(false);
         return;
       }
 
-      // Ensure user doc exists
+      // ensure user doc
       const ref = doc(db, "users", user.uid);
       let snap = await getDoc(ref);
       if (!snap.exists()) {
@@ -37,37 +41,37 @@ export default function AuthGate({ children }) {
 
       const data = snap.data() || {};
       const setupComplete = Boolean(data.setupComplete);
-      const verifications = data.verifications || {};
-      const selfieVideoUrl = data.selfieVideoUrl || "";
-      const videoVerified = verifications.video ?? Boolean(selfieVideoUrl);
+      const videoVerified =
+        (data.verifications && data.verifications.video) ||
+        Boolean(data.selfieVideoUrl);
 
-      console.log("[AuthGate] data", {
-        setupComplete,
-        verifications,
-        selfieVideoUrl,
-        videoVerified,
-      });
-
-      // If selfie not verified → redirect
       if (!videoVerified) {
-        navigate("/verify-selfie", { replace: true });
+        setRedirect({ to: "/verify-selfie" });
+        setChecking(false);
         return;
       }
 
-      // If setup not complete → redirect
       if (!setupComplete) {
-        navigate("/match-setup", { replace: true });
+        setRedirect({ to: "/match-setup" });
+        setChecking(false);
         return;
       }
 
-      // Passed all checks → allow access
-      setReady(true);
+      // all good
+      setRedirect(null);
+      setChecking(false);
     });
 
     return () => unsub();
-  }, [navigate, location]);
+  }, []);
 
-  if (!ready) return <p>Loading…</p>;
+  if (checking) return <p style={{ padding: "2rem" }}>Loading…</p>;
 
-  return <>{children}</>;
+  if (redirect) {
+    // preserve intended path so you can come back after completing flow
+    return <Navigate to={redirect.to} replace state={{ from: location }} />;
+  }
+
+  // ✅ Render the matched protected route here
+  return <Outlet />;
 }
