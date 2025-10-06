@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import './MatchSetup.css';
 import { useNavigate } from 'react-router-dom';
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db, auth } from "../firebase-config";
 
 export default function MatchSetup() {
@@ -46,7 +46,7 @@ export default function MatchSetup() {
     }
 
     try {
-      await updateDoc(doc(db, "users", uid), {
+      await setDoc(doc(db, "users", uid), {
         firstName: formData.firstName,
         age: formData.age,
         gender: formData.gender,
