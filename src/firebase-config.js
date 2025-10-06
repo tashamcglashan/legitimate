@@ -13,6 +13,20 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
+const required = [
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_AUTH_DOMAIN',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_STORAGE_BUCKET',
+  'VITE_FIREBASE_MESSAGING_SENDER_ID',
+  'VITE_FIREBASE_APP_ID',
+];
+for (const k of required) {
+  if (!import.meta.env[k]) {
+    console.error(`Missing ${k}`);
+  }
+}
+console.log('API key length:', (import.meta.env.VITE_FIREBASE_API_KEY || '').length);
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
