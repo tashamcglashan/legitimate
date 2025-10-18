@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { storage } from "../firebase-config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../firebase-config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
@@ -7,7 +9,12 @@ import "./ProfilePage.css";
 import blueCheck from "../assets/verified_32.32.png"; // Import the blue check image
 
 
-
+async function uploadToStorage(uid, file) {
+  const storageRef = ref(storage, `users/${uid}/photos/${Date.now()}_${file.name}`);
+  await uploadBytes(storageRef, file);
+  const httpsURL = await getDownloadURL(storageRef);
+  return httpsURL;
+}
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
@@ -15,7 +22,7 @@ export default function ProfilePage() {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -55,26 +62,25 @@ export default function ProfilePage() {
     return () => unsubscribe();
   }, []);
   
-  
-
-  const handlePhotoChange = (index, e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const newUrl = URL.createObjectURL(file);
-    const updated = [...photos];
-    updated[index] = newUrl;
-    setPhotos(updated);
-  };
 
   const handleRemovePhoto = (index) => {
     const updated = photos.filter((_, i) => i !== index);
     setPhotos(updated);
   };
 
-  const handleAddPhotos = (e) => {
-    const files = Array.from(e.target.files);
-    const urls = files.map((file) => URL.createObjectURL(file));
-    setPhotos((prev) => [...prev, ...urls].slice(0, 6)); // Limit to 6
+  const handleAddPhotos =  async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+  const uid = auth.currentUser?.uid;
+  if (!uid) return;
+
+  // Upload all selected files and collect their https URLs
+  const uploadedUrls = await Promise.all(files.map((f) => uploadToStorage(uid, f)));
+
+  // Add to existing photos, cap at 6
+  setPhotos((prev) => [...prev, ...uploadedUrls].slice(0, 6));
+};
   };
 
   const savePhotos = async () => {
@@ -122,7 +128,11 @@ export default function ProfilePage() {
       {url.includes("cloudinary") ? (
         <video src={url} controls className="photo-thumbnail" />
       ) : (
-        <img src={url} alt={`Photo ${index + 1}`} className="photo-thumbnail" />
+        <img src={url} 
+        alt={`Photo ${index + 1}`} 
+        className="photo-thumbnail" 
+        onError= {(e) => {e.currentTarget.src = "/fallback-photo.png";}}
+        />
       )}
 
       {/* ✅ Show blue check only if selfie is verified */}
