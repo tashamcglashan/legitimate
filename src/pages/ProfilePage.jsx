@@ -8,6 +8,26 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import "./ProfilePage.css";
 import blueCheck from "../assets/verified_32.32.png"; // Import the blue check image
 
+function isValidHttpUrl (u) {
+  return typeof u === "string" &&
+         u.startsWith("http") &&
+         !u.startsWith("blob:") &&
+         !u.includes("localhost");
+}
+
+async function uploadVideoToCloudinary(file) {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("upload_preset", "verify-selfie-video"); // your unsigned preset
+  const res = await fetch("https://api.cloudinary.com/v1_1/dwmy6fyvl/video/upload", {
+    method: "POST",
+    body: form
+  });
+  const data = await res.json();
+  if (!data.secure_url) throw new Error(data.error?.message || "Cloudinary upload failed");
+  return data.secure_url; // https://...mp4
+}
+
 
 async function uploadToStorage(uid, file) {
   const storageRef = ref(storage, `users/${uid}/photos/${Date.now()}_${file.name}`);
@@ -32,7 +52,16 @@ export default function ProfilePage() {
         if (snapshot.exists()) {
           const data = snapshot.data();
           setUserData(data);
-          setPhotos(data.photos || []);
+          const raw = data.photos || [];
+const cleaned = raw.filter(isValidHttpUrl);
+
+// If anything changed, write the cleaned list back once
+if (cleaned.length !== raw.length) {
+  await updateDoc(docRef, { photos: cleaned });
+}
+setUserData({ ...data, photos: cleaned });
+setPhotos(cleaned);
+
   
           if (!data.photos || data.photos.length === 0) {
             navigate("/match-setup");
@@ -68,20 +97,25 @@ export default function ProfilePage() {
     setPhotos(updated);
   };
 
-  const handleAddPhotos =  async (e) => {
+  const handleAddPhotos = async (e) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-
-  // Upload all selected files and collect their https URLs
-  const uploadedUrls = await Promise.all(files.map((f) => uploadToStorage(uid, f)));
-
-  // Add to existing photos, cap at 6
-  setPhotos((prev) => [...prev, ...uploadedUrls].slice(0, 6));
-};
+    if (!files.length) return;
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+  
+    const uploads = files.map(async (f) => {
+      // Prefer mp4 for videos
+      if (f.type.startsWith("video/")) {
+        return await uploadVideoToCloudinary(f); // returns https URL
+      }
+      // images -> Firebase Storage
+      return await uploadToStorage(uid, f); // returns https URL
+    });
+  
+    const urls = await Promise.all(uploads);
+    setPhotos((prev) => [...prev, ...urls].slice(0, 6));
   };
+  
 
   const savePhotos = async () => {
     const uid = auth.currentUser?.uid;
