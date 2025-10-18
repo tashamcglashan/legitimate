@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PhotoGalleryEditor from "../components/PhotoGalleryEditor";
 import { storage } from "../firebase-config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
@@ -6,207 +7,59 @@ import { auth, db } from "../firebase-config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import "./ProfilePage.css";
-import blueCheck from "../assets/verified_32.32.png"; // Import the blue check image
-
-function isValidHttpUrl (u) {
-  return typeof u === "string" &&
-         u.startsWith("http") &&
-         !u.startsWith("blob:") &&
-         !u.includes("localhost");
-}
-
-async function uploadVideoToCloudinary(file) {
-  const form = new FormData();
-  form.append("file", file);
-  form.append("upload_preset", "verify-selfie-video"); // your unsigned preset
-  const res = await fetch("https://api.cloudinary.com/v1_1/dwmy6fyvl/video/upload", {
-    method: "POST",
-    body: form
-  });
-  const data = await res.json();
-  if (!data.secure_url) throw new Error(data.error?.message || "Cloudinary upload failed");
-  return data.secure_url; // https://...mp4
-}
-
-
-async function uploadToStorage(uid, file) {
-  const storageRef = ref(storage, `users/${uid}/photos/${Date.now()}_${file.name}`);
-  await uploadBytes(storageRef, file);
-  const httpsURL = await getDownloadURL(storageRef);
-  return httpsURL;
-}
+import blueCheck from "../assets/verified_32.32.png"; // ✅ keep your verified badge
 
 export default function ProfilePage() {
   const [userData, setUserData] = useState(null);
-  const [editMode, setEditMode] = useState(false);
   const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const snapshot = await getDoc(docRef);
-  
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          setUserData(data);
-          const raw = data.photos || [];
-const cleaned = raw.filter(isValidHttpUrl);
-
-// If anything changed, write the cleaned list back once
-if (cleaned.length !== raw.length) {
-  await updateDoc(docRef, { photos: cleaned });
-}
-setUserData({ ...data, photos: cleaned });
-setPhotos(cleaned);
-
-  
-          if (!data.photos || data.photos.length === 0) {
-            navigate("/match-setup");
-            return;
-          }
-  
-          if (
-            location.pathname !== "/verify-selfie" &&
-            (!data.verifications || data.verifications.selfie !== true)
-          ) {
-            navigate("/verify-selfie");
-            return;
-          }
-  
-        } else {
-          console.log("User document not found");
-          navigate("/signin");
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setUserData(userSnap.data());
+          setPhotos(userSnap.data().photos || []);
         }
       } else {
-        console.log("No user is signed in");
         navigate("/signin");
       }
-  
-      setLoading(false);
     });
-  
+
     return () => unsubscribe();
-  }, []);
-  
+  }, [navigate]);
 
-  const handleRemovePhoto = (index) => {
-    const updated = photos.filter((_, i) => i !== index);
-    setPhotos(updated);
+  const handleSignOut = async () => {
+    await signOut(auth);
+    navigate("/signin");
   };
-
-  const handleAddPhotos = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-  
-    const uploads = files.map(async (f) => {
-      // Prefer mp4 for videos
-      if (f.type.startsWith("video/")) {
-        return await uploadVideoToCloudinary(f); // returns https URL
-      }
-      // images -> Firebase Storage
-      return await uploadToStorage(uid, f); // returns https URL
-    });
-  
-    const urls = await Promise.all(uploads);
-    setPhotos((prev) => [...prev, ...urls].slice(0, 6));
-  };
-  
-
-  const savePhotos = async () => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-    try {
-      await updateDoc(doc(db, "users", uid), {
-        photos: photos,
-      });
-
-      const updatedDoc = await getDoc(doc(db, "users", uid));
-      if (updatedDoc.exists()) {
-        setUserData(updatedDoc.data());
-        setEditMode(false);
-      }
-    } catch (err) {
-      console.error("Error updating photos:", err);
-    }
-  };
-
-  const handleLogOut = async () => {
-    try {
-      await signOut(auth);
-      navigate("/signin");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
-
-  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="profile-page">
       <h1>Welcome, {userData?.firstName || "Friend"}</h1>
+
+      {/* ✅ Selfie Verification Status */}
       {userData?.verifications?.selfie ? (
-  <div className="verified-status selfie-verified">✅ Selfie Verified</div>
-) : (
-  <div className="verified-status selfie-pending">⏳ Selfie Pending Review</div>
-)}
-      <h3>Your Photos</h3>
-      <div className="photo-preview">
-      {photos.map((url, index) => (
-  <div className="photo-wrapper" key={index}>
-    <div className="photo-with-badge">
-      {url.includes("cloudinary") ? (
-        <video src={url} controls className="photo-thumbnail" />
+        <div className="verified-status selfie-verified">
+          ✅ Selfie Verified
+        </div>
       ) : (
-        <img src={url} 
-        alt={`Photo ${index + 1}`} 
-        className="photo-thumbnail" 
-        onError= {(e) => {e.currentTarget.src = "/fallback-photo.png";}}
-        />
-      )}
-
-      {/* ✅ Show blue check only if selfie is verified */}
-      {userData?.verifications?.selfie && (
-        <img src={blueCheck} alt="Verified" className="blue-badge" />
-      )}
-    </div>
-  </div>
-))}
-
-
-      </div>
-
-      {editMode && (
-        <div className="photo-add">
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleAddPhotos}
-          />
+        <div className="verified-status selfie-pending">
+          ⏳ Selfie Pending Review
         </div>
       )}
 
-      <div className="edit-actions">
-        {!editMode ? (
-          <button onClick={() => setEditMode(true)}>Edit Photos</button>
-        ) : (
-          <>
-            <button onClick={savePhotos}>Save New Photos</button>
-            <button onClick={() => setEditMode(false)}>Cancel</button>
-          </>
-        )}
-      </div>
+      {/* ✅ Photo Section */}
+      <h3>Your Photos</h3>
+      {/* This single component replaces your old photos.map block */}
+      <PhotoGalleryEditor />
 
-      <div className="logout-wrapper">
-        <button className="logout-button" onClick={handleLogOut}>
-          Log Out
-        </button>
-      </div>
+      {/* ✅ Optional sign out or other profile actions */}
+      <button className="signout-btn" onClick={handleSignOut}>
+        Sign Out
+      </button>
     </div>
   );
 }
