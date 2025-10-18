@@ -91,34 +91,45 @@ export default function PhotoGalleryEditor() {
     if (!user) return alert("Please sign in again.");
     const confirmed = window.confirm("Delete this photo? This cannot be undone.");
     if (!confirmed) return;
-
+  
     setDeletingId(photo.url);
     const userRef = doc(db, "users", user.uid);
-
+  
     try {
-      // Prefer `path`; otherwise derive ref from https URL
-      const fileRef = photo.path
-        ? storageRef(storage, photo.path)
-        : refFromURL(photo.url);
-      await deleteObject(fileRef);
-
+      // Is this a Firebase Storage file?
+      const isFirebaseUrl =
+        (photo.path && typeof photo.path === "string") ||
+        photo.url.startsWith("https://firebasestorage.googleapis.com") ||
+        photo.url.startsWith("gs://");
+  
+      // 1) Delete from Firebase Storage only if it's a Firebase file
+      if (isFirebaseUrl) {
+        const fileRef = photo.path
+          ? storageRef(storage, photo.path)
+          : refFromURL(photo.url);
+        await deleteObject(fileRef);
+      }
+      // If it's Cloudinary (or any non-Firebase URL), skip storage delete.
+  
+      // 2) Remove from Firestore either way (works for strings or objects)
       const snap = await getDoc(userRef);
       const data = snap.data() || {};
       const current = Array.isArray(data.photos) ? data.photos : [];
-
+  
       const remaining = current.filter((p) =>
         typeof p === "string" ? p !== photo.url : p.url !== photo.url
       );
-
+  
       await updateDoc(userRef, { photos: remaining });
       setPhotos(remaining);
-    } catch (e) {
-      console.error("Delete failed", e);
-      alert("Sorry, couldn't delete that photo. Check your Firebase Storage rules or try again.");
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("Removed from profile. External file wasn’t deleted because it’s not hosted on Firebase.");
     } finally {
       setDeletingId(null);
     }
   }
+  
 
   if (loading) {
     return (
