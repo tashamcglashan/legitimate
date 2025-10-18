@@ -51,6 +51,10 @@ export default function PhotoGalleryEditor() {
     };
   }, [user]);
 
+  const normalized = photos.map((p) =>
+    typeof p === "string" ? { url: p } : p
+  );
+
   // Normalize strings -> objects
   const normalized = photos.map((p) => (typeof p === "string" ? { url: p } : p));
 
@@ -118,51 +122,31 @@ export default function PhotoGalleryEditor() {
 
   if (loading) {
     return (
-      <div className="pg-wrapper">
-        <div className="pg-header">
-          <h2>My Photos</h2>
-          <p className="pg-sub">Loading your gallery…</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="pg-wrapper">
-      <div className="pg-header">
-        <h2>My Photos</h2>
-
-        {/* Upload button */}
-        <label className="pg-upload-btn">
-          {uploading ? "Uploading…" : "Upload Photo"}
-          <input
-            type="file"
-            accept="image/*,video/mp4"
-            onChange={handleUpload}
-            disabled={uploading}
-            hidden
-          />
-        </label>
-      </div>
-
-      {normalized.length === 0 ? (
-        <div className="pg-empty">No photos yet.</div>
-      ) : (
-        <div className="pg-grid">
-          {normalized.map((photo) => (
-            <div className="pg-card" key={photo.url}>
-              {/(mp4|video)/i.test(photo.url) || photo.url.includes("cloudinary") ? (
-                <video src={photo.url} controls className="pg-img" />
-              ) : (
-                <img
-                  src={photo.url}
-                  alt="User upload"
-                  className="pg-img"
-                  onError={(e) => {
-                    e.currentTarget.src = "/fallback-photo.png";
-                  }}
-                />
-              )}
+        <div className="pg-wrapper">
+          <div className="pg-header">
+            <h2>My Photos</h2>
+            <label className="pg-upload-btn">
+              {uploading ? "Uploading…" : "Upload Photo"}
+              <input type="file" accept="image/*,video/mp4" onChange={handleUpload} disabled={uploading} hidden />
+            </label>
+          </div>
+      
+          {normalized.length === 0 ? (
+            <div className="pg-empty">No photos yet.</div>
+          ) : (
+            <div className="pg-grid">
+              {normalized.map((photo) => (
+                <div className="pg-card" key={photo.url}>
+                  {/(mp4|video)/i.test(photo.url) || photo.url.includes("cloudinary") ? (
+                    <video src={photo.url} controls className="pg-img" />
+                  ) : (
+                    <img
+                      src={photo.url}
+                      alt="User upload"
+                      className="pg-img"
+                      onError={(e) => { e.currentTarget.src = "/fallback-photo.png"; }}
+                    />
+                  )}
 
               <button
                 className="pg-delete"
@@ -185,4 +169,5 @@ export default function PhotoGalleryEditor() {
       )}
     </div>
   );
+}
 }
