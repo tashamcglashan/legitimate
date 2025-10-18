@@ -34,42 +34,51 @@ export default function PhotoGalleryEditor() {
     fetchPhotos();
     return () => { isMounted = false; };
   }, [user]);
+   
+    const normalized = photos.map(p => (typeof p === 'string' ? { url: p } : p));
 
-  async function handleDelete(photo) {
-    if (!user) return alert("Please sign in again.");
-    const confirmed = window.confirm("Delete this photo? This cannot be undone.");
-    if (!confirmed) return;
-
-    setDeletingId(photo.url);
-    const userRef = doc(db, "users", user.uid);
-
-    try {
-      // Delete from Storage
-      const fileRef = photo.path ? storageRef(storage, photo.path) : storageRef(storage, photo.url);
-      await deleteObject(fileRef);
-
-      // Remove from Firestore
-      const snap = await getDoc(userRef);
-      const data = snap.data() || {};
-      const current = Array.isArray(data.photos) ? data.photos : [];
-
-      try {
-        await updateDoc(userRef, { photos: arrayRemove(photo) });
-      } catch (_) {
-        const remaining = current.filter((p) => p.url !== photo.url);
-        await updateDoc(userRef, { photos: remaining });
+    async function handleDelete(photo) {
+        if (!user) return alert("Please sign in again.");
+      
+        // Ask user to confirm delete
+        const confirmed = window.confirm("Delete this photo? This cannot be undone.");
+        if (!confirmed) return;
+      
+        // Highlight the deleting photo
+        setDeletingId(photo.url);
+      
+        // 👇 This is where your userRef and delete logic go
+        const userRef = doc(db, "users", user.uid);
+      
+        try {
+          // 1️⃣ Delete from Firebase Storage
+          const fileRef = photo.path
+            ? storageRef(storage, photo.path)
+            : storageRef(storage, photo.url);
+          await deleteObject(fileRef);
+      
+          // 2️⃣ Remove from Firestore
+          const snap = await getDoc(userRef);
+          const data = snap.data() || {};
+          const current = Array.isArray(data.photos) ? data.photos : [];
+      
+          // Works for both array of strings or objects
+          const remaining = current.filter((p) =>
+            typeof p === "string" ? p !== photo.url : p.url !== photo.url
+          );
+      
+          await updateDoc(userRef, { photos: remaining });
+      
+          // 3️⃣ Update local state so it disappears immediately
+          setPhotos(remaining);
+        } catch (err) {
+          console.error("Delete failed", err);
+          alert("Sorry, couldn't delete that photo. Try again.");
+        } finally {
+          setDeletingId(null);
+        }
       }
-
-      // Update local state
-      setPhotos((prev) => prev.filter((p) => p.url !== photo.url));
-    } catch (err) {
-      console.error("Delete failed", err);
-      alert("Sorry, couldn't delete that photo. Try again.");
-    } finally {
-      setDeletingId(null);
-    }
-  }
-
+      
   if (loading) {
     return (
       <div className="pg-wrapper">
@@ -85,16 +94,28 @@ export default function PhotoGalleryEditor() {
     <div className="pg-wrapper">
       <div className="pg-header">
         <h2>My Photos</h2>
-        <p className="pg-sub">Click the trash icon to remove a photo.</p>
+        <p className="pg-sub">Click the Delete button to remove a photo.</p>
       </div>
-
-      {photos.length === 0 ? (
+  
+      {normalized.length === 0 ? (
         <div className="pg-empty">No photos yet.</div>
       ) : (
         <div className="pg-grid">
-          {photos.map((photo) => (
+          {normalized.map((photo) => (
             <div className="pg-card" key={photo.url}>
-              <img src={photo.url} alt="User upload" className="pg-img" />
+              {/(mp4|video)/i.test(photo.url) || photo.url.includes("cloudinary") ? (
+                <video src={photo.url} controls className="pg-img" />
+              ) : (
+                <img
+                  src={photo.url}
+                  alt="User upload"
+                  className="pg-img"
+                  onError={(e) => {
+                    e.currentTarget.src = "/fallback-photo.png";
+                  }}
+                />
+              )}
+  
               <button
                 className="pg-delete"
                 onClick={() => handleDelete(photo)}
@@ -102,8 +123,9 @@ export default function PhotoGalleryEditor() {
                 aria-label="Delete photo"
                 title="Delete photo"
               >
-                {deletingId === photo.url ? "Deleting…" : "🗑"}
+                {deletingId === photo.url ? "Deleting…" : "🗑 Delete"}
               </button>
+  
               {photo.uploadedAt && (
                 <div className="pg-meta">
                   {new Date(photo.uploadedAt).toLocaleDateString()}
