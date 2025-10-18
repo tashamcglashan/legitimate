@@ -1,12 +1,38 @@
 .pg-wrapper { max-width: 1000px; margin: 0 auto; padding: 24px; }
-.pg-header { display: flex; align-items: baseline; gap: 12px; justify-content: space-between; margin-bottom: 12px; }
+.pg-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .pg-sub { color: #667085; font-size: 14px; }
 .pg-empty { padding: 32px; text-align: center; color: #667085; border: 1px dashed #d0d5dd; border-radius: 12px; }
+
+.pg-upload-btn {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #d0d5dd;
+  cursor: pointer;
+  font-size: 14px;
+  background: #fff;
+}
+
 .pg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
 .pg-card { position: relative; border-radius: 16px; overflow: hidden; background: #f7f7f7; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
 .pg-img { display: block; width: 100%; height: 220px; object-fit: cover; }
-.pg-delete { position: absolute; top: 8px; right: 8px; background: #111; color: #fff; border: none; border-radius: 999px; padding: 8px 10px; cursor: pointer; font-size: 14px; opacity: 0.92; transition: transform 0.15s ease, opacity 0.15s ease; }
+
+.pg-delete {
+  position: absolute;
+  top: 8px; right: 8px;
+  z-index: 2;              /* <-- keeps it above badges/overlays */
+  background: #111; color: #fff;
+  border: none; border-radius: 999px;
+  padding: 8px 12px; cursor: pointer; font-size: 13px;
+  opacity: .95; transition: transform .15s ease, opacity .15s ease;
+}
 .pg-delete:hover { transform: scale(1.04); opacity: 1; }
-.pg-delete:disabled { opacity: 0.6; cursor: not-allowed; }
-.pg-meta { position: absolute; left: 8px; bottom: 8px; background: rgba(0,0,0,0.55); color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 8px; }
+.pg-delete:disabled { opacity: .6; cursor: not-allowed; }
+
+.pg-meta {
+  position: absolute; left: 8px; bottom: 8px;
+  background: rgba(0,0,0,.55); color: #fff; font-size: 12px;
+  padding: 4px 8px; border-radius: 8px;
+}
+
 @media (max-width: 480px) { .pg-img { height: 160px; } }
